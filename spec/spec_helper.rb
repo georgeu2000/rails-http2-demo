@@ -8,6 +8,8 @@ require 'rspec/rails'
 require 'capybara/rspec'
 require 'webmock/rspec'
 
+require './lib/scripts/server'
+
 
 WebMock.disable_net_connect!( allow_localhost:true )
 
@@ -33,16 +35,19 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
   config.backtrace_exclusion_patterns = [
-    /gems/
+    # /gems/
   ]
 
   config.before(:all) do
+    # @thread = Thread.new{ start_server }
+    sleep 0.1
   end
 
   config.before(:each) do
   end
-end
 
-def app
-  Capybara.app
+  config.after(:all) do
+    puts 'Stopping server.'
+    # @thread.kill
+  end
 end

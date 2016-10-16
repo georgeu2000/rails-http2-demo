@@ -123,7 +123,6 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    puma (3.6.0)
     rack (2.0.1)
     rack-test (0.6.3)
       rack (>= 1.0)
@@ -233,7 +232,6 @@ DEPENDENCIES
   jquery-rails
   launchy (~> 2.4)
   pry
-  puma (~> 3.0)
   rails (~> 5.0.0, >= 5.0.0.1)
   rspec-rails (~> 3.5)
   sass-rails (~> 5.0)
@@ -244,4 +242,4 @@ DEPENDENCIES
   webmock (~> 2.1)
 
 BUNDLED WITH
-   1.13.2
+   1.13.4
