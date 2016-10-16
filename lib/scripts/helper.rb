@@ -7,9 +7,9 @@ def respond app, req, buffer, stream
   body = body_arr.join
 
   headers.merge( status:status )
-
   ap headers
-  # ap body.read.join; body.rewind
+  
+  send_push stream, 200, 'This is the push message.'
 
   content_length = { 'content-length' => body.bytesize.to_s }
   headers.merge!( content_length )
@@ -18,9 +18,9 @@ def respond app, req, buffer, stream
   stream.data    body
 end
 
-def send_push stream, message
-  content_length = { 'content-length' => message[ :data ].bytesize.to_s }
-  headers = message[ :headers ].merge( content_length )
+def send_push stream, status, body
+  headers = { 'status' => status.to_s,
+              'content-length' => body.bytesize.to_s }
 
   push_stream =  nil
   stream.promise( headers ) do | push |
@@ -28,7 +28,7 @@ def send_push stream, message
     push_stream = push
   end
 
-  push_stream.data message[ :data ]
+  push_stream.data body
 end
 
 def build_env_for req, body, stream

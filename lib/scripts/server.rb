@@ -8,7 +8,6 @@ def start_server
 
   server = TCPServer.new( 8080 )
 
-
   # Secure server
   ctx = OpenSSL::SSL::SSLContext.new
   ctx.cert = OpenSSL::X509::Certificate.new(File.open('lib/keys/server.crt'))
