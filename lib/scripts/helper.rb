@@ -1,14 +1,13 @@
 DRAFT = 'h2'.freeze
 
 
-def respond app, req, buffer, stream
-  env = build_env_for( req, buffer, stream )
+def respond app, req, buffer, stream, sock
+  env = build_env_for( req, buffer, stream, sock )
   status, headers, body_arr =  app.call( env )
   body = body_arr.join
 
   headers.merge( status:status )
-  ap headers
-  
+    
   send_push stream, 200, 'This is the push message.'
 
   content_length = { 'content-length' => body.bytesize.to_s }
@@ -31,16 +30,14 @@ def send_push stream, status, body
   push_stream.data body
 end
 
-def build_env_for req, body, stream
-  env = req.map do | k,v |
-    key = k.gsub( /^:/, '' ).to_sym
+def build_env_for req, body, stream, sock
+  uri = "#{ req[ ':scheme' ]}://#{ req[ ':authority' ]}#{ req[ ':path' ]}"
 
-    [ key, v ]
-  end.to_h
+  rack_req = Rack::MockRequest.env_for( uri )
+  rack_req[ 'ACCEPT' ] = req[ 'accept' ]
+  rack_req[ 'SOCKET' ] = sock
 
-  uri = "#{ env[ :scheme ]}://#{ env[ :authority ]}#{ env[ :path ]}"
-
-  ap rack_req = Rack::MockRequest.env_for( uri, env )
+  ap rack_req
 
   rack_req
 end

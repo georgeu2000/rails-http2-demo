@@ -1,7 +1,5 @@
 require_relative 'helper'
 
-DRAFT = 'h2'.freeze
-
 def start_server
   puts "\n\nStarting server."
   app = Rails.application.initialize!
@@ -64,7 +62,7 @@ def start_server
       end
 
       stream.on(:half_close) do
-        respond app, req, buffer, stream
+        respond app, req, buffer, stream, sock
         buffer = ''
       end
     end
