@@ -8,7 +8,7 @@ def respond app, req, buffer, stream, sock
 
   headers.merge( status:status )
     
-  send_push stream, 200, 'This is the push message.'
+  # send_push stream, 200, 'This is the push message.'
 
   content_length = { 'content-length' => body.bytesize.to_s }
   headers.merge!( content_length )
@@ -42,14 +42,6 @@ def build_env_for req, body, stream, sock
   rack_req
 end
 
-def upgrade_message
-<<-eos 
-HTTP/1.1 101 Switching Protocols 
-Connection: Upgrade
-Upgrade: h2c
-
-eos
-end
 
 def no_upgrade_message
   "HTTP-Version = HTTP/1.1
