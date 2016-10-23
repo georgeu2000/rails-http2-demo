@@ -11,7 +11,8 @@ require './lib/scripts/server'
 
 WebMock.disable_net_connect!( allow_localhost:true )
 
-Capybara.javascript_driver = :selenium
+# Rack Driver does not make bonafide requests
+Capybara.default_driver = :selenium
 # Capybara.server_port = 8080
 Capybara.run_server = false
 
@@ -47,7 +48,7 @@ RSpec.configure do |config|
   end
 
   config.after(:all) do
-    puts 'Stopping server.'
+    puts "\nStopping server."
     @thread.kill
   end
 end

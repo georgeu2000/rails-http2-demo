@@ -1,7 +1,7 @@
 require_relative 'helper'
 
 def start_server options
-  puts "Starting server on port #{options[:port]}"
+  puts "Starting #{ options[ :secure ] ? 'secure' : 'insecure' } server on port #{options[:port]}"
   server = TCPServer.new(options[:port])
 
   if options[:secure]
@@ -59,17 +59,8 @@ def start_server options
 
       stream.on(:half_close) do
         log.info 'client closed its end of the stream'
-
-        # respond req, buffer, stream, sock
-
-        response = 'Welcome fake request'
-        stream.headers({
-          ':status' => '200',
-          'content-length' => response.bytesize.to_s,
-          'content-type' => 'text/plain',
-        }, end_stream: false)  
-
-        stream.data(response)
+        
+        respond req, buffer, stream, sock
       end
     end
 

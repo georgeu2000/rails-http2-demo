@@ -5,24 +5,39 @@ def respond req, buffer, stream, sock
 
   env = build_env_for( req, buffer, stream, sock )
   status, headers, body_arr =  app.call( env )
-  body = body_arr.join
+  body = ''
+  body_arr.each{| z | body << z }
 
-  headers.merge( status:status )
-    
   # send_push stream, 200, 'This is the push message.'
 
-  content_length = { 'content-length' => body.bytesize.to_s }
-  headers.merge!( content_length )
+  headers.merge!( ':status'        => status.to_s        )
+  headers.merge!( 'content-length' => body.bytesize.to_s )
+  headers.merge!( 'content-type'   => 'text/plain'       )
 
-  ap headers
-  ap body
-
+  delete_problem_headers! headers
+  
   stream.headers headers, end_stream: false
   stream.data    body
 end
 
+def delete_problem_headers! headers
+  headers.delete 'ETag'
+  headers.delete "X-Frame-Options"
+  headers.delete "X-XSS-Protection"
+  headers.delete "X-Content-Type-Options"
+  headers.delete "Cache-Control"
+  headers.delete "X-Request-Id"
+  headers.delete "X-Runtime"
+end
+
 def app
-  Rails.application.initialize!
+  begin
+    Rails.application.initialize!
+  rescue
+  end
+
+  Rails.logger ||= Logger.new(STDOUT)
+  Rails.application
 end
 
 def send_push stream, status, body

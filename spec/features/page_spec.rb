@@ -4,6 +4,8 @@ feature 'Page' ,:focus do
 
     # binding.pry
 
+    sleep 1
+
     expect( page ).to have_content 'Welcome'
   end
 end
