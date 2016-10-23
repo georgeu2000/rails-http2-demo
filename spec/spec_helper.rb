@@ -6,14 +6,14 @@ ENV[ 'RACK_ENV' ] = 'test'
 require File.expand_path('../../config/environment', __FILE__)
 require 'rspec/rails'
 require 'capybara/rspec'
-require 'webmock/rspec'
 
 require './lib/scripts/server'
-
 
 WebMock.disable_net_connect!( allow_localhost:true )
 
 Capybara.javascript_driver = :selenium
+# Capybara.server_port = 8080
+Capybara.run_server = false
 
 RSpec.configure do |config|
   config.include Rack::Test::Methods
@@ -35,11 +35,11 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
   config.backtrace_exclusion_patterns = [
-    # /gems/
+    /gems/
   ]
 
   config.before(:all) do
-    # @thread = Thread.new{ start_server }
+    @thread = Thread.new{ start_server( secure:true, port:8080 )}
     sleep 0.1
   end
 
@@ -48,6 +48,6 @@ RSpec.configure do |config|
 
   config.after(:all) do
     puts 'Stopping server.'
-    # @thread.kill
+    @thread.kill
   end
 end

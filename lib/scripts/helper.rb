@@ -1,7 +1,8 @@
 DRAFT = 'h2'.freeze
 
+def respond req, buffer, stream, sock
+  ap __method__
 
-def respond app, req, buffer, stream, sock
   env = build_env_for( req, buffer, stream, sock )
   status, headers, body_arr =  app.call( env )
   body = body_arr.join
@@ -13,8 +14,15 @@ def respond app, req, buffer, stream, sock
   content_length = { 'content-length' => body.bytesize.to_s }
   headers.merge!( content_length )
 
+  ap headers
+  ap body
+
   stream.headers headers, end_stream: false
   stream.data    body
+end
+
+def app
+  Rails.application.initialize!
 end
 
 def send_push stream, status, body
@@ -37,20 +45,7 @@ def build_env_for req, body, stream, sock
   rack_req[ 'ACCEPT' ] = req[ 'accept' ]
   rack_req[ 'SOCKET' ] = sock
 
-  ap rack_req
-
   rack_req
-end
-
-
-def no_upgrade_message
-  "HTTP-Version = HTTP/1.1
-status: 200
-content-type: text/plain
-content-length: 19
-Date: Thu Oct 13 03:38:00 2016
-
-Staying at HTTP 1.1\n"
 end
 
 def print_frame frame

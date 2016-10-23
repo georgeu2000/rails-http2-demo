@@ -6,22 +6,20 @@ def start_server options
 
   if options[:secure]
     ctx = OpenSSL::SSL::SSLContext.new
-    ctx.cert = OpenSSL::X509::Certificate.new(File.open('lib/keys/server.crt'))
-    ctx.key = OpenSSL::PKey::RSA.new(File.open('lib/keys/server.key'))
+    ctx.cert = OpenSSL::X509::Certificate.new(File.open('lib/keys/localhost-cert.pem'))
+    ctx.key = OpenSSL::PKey::RSA.new(File.open('lib/keys/localhost-key.pem'))
 
     ctx.ssl_version = :TLSv1_2
-    # ctx.options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
-    # ctx.ciphers = 'EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES'
-
+    ctx.alpn_protocols = ['h2']
 
     ctx.alpn_select_cb = lambda do |protocols|
       raise "Protocol #{DRAFT} is required" if protocols.index(DRAFT).nil?
       DRAFT
     end
 
-    # ctx.tmp_ecdh_callback = lambda do |_args|
-    #   OpenSSL::PKey::EC.new 'prime256v1'
-    # end
+    ctx.tmp_ecdh_callback = lambda do |*_args|
+      OpenSSL::PKey::EC.new 'prime256v1'
+    end
 
     server = OpenSSL::SSL::SSLServer.new(server, ctx)
   end
@@ -62,50 +60,16 @@ def start_server options
       stream.on(:half_close) do
         log.info 'client closed its end of the stream'
 
-        response = nil
-        if req[':method'] == 'POST'
-          log.info "Received POST request, payload: #{buffer}"
-          response = "Hello HTTP 2.0! POST payload: #{buffer}"
-        else
-          log.info 'Received GET request'
-          response = 'Hello HTTP 2.0! GET request'
-        end
+        # respond req, buffer, stream, sock
 
+        response = 'Welcome fake request'
         stream.headers({
           ':status' => '200',
           'content-length' => response.bytesize.to_s,
           'content-type' => 'text/plain',
-        }, end_stream: false)
+        }, end_stream: false)  
 
-        if options[:push]
-          push_streams = []
-
-          # send 10 promises
-          10.times do |i|
-            sleep 1
-            puts 'sending push'
-
-            head = { ':method' => 'GET',
-                     ':authority' => 'localhost',
-                     ':path' => "/other_resource/#{i}" }
-
-            stream.promise(head) do |push|
-              push.headers(':status' => '200', 'content-type' => 'text/plain', 'content-length' => '11')
-              push_streams << push
-            end
-          end
-        end
-
-        # split response into multiple DATA frames
-        stream.data(response.slice!(0, 5), end_stream: false)
         stream.data(response)
-
-        if options[:push]
-          push_streams.each_with_index do |push, i|
-            sleep 1
-            push.data("push_data #{i}")
-          end
-        end
       end
     end
 

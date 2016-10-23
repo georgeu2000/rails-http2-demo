@@ -7,6 +7,7 @@ guard :rspec, cmd: "bundle exec rspec", all_on_start:true do
   watch(%r{^app/assets/javascripts/(.+)\.js$})        { "spec" }
   watch(%r{^app/assets/stylesheets/(.+)\.css$})       { "spec" }
   watch(%r{^app/controllers/(.+)_controller\.rb$})    { "spec" }
+  watch(%r{^lib/scripts/(.+)\.rb$})                   { "spec" }
   watch(%r{^app/views/.+/.+\.erb$})                   { "spec" }
   watch(%r{^spec/factories/(.+)\.rb$})                { "spec" }
   watch(%r{^spec/support/(.+)\.rb$})                  { "spec" }

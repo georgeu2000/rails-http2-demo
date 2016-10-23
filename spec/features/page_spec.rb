@@ -1,8 +1,8 @@
-feature 'Page' ,:js do
+feature 'Page' ,:focus do
   specify 'Messaging' do
-    visit '/'
+    visit 'https://localhost:8080/'
 
-    binding.pry
+    # binding.pry
 
     expect( page ).to have_content 'Welcome'
   end
