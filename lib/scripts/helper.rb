@@ -5,19 +5,19 @@ def respond req, buffer, stream, sock
 
   env = build_env_for( req, buffer, stream, sock )
   status, headers, body_arr =  app.call( env )
-  body = ''
-  body_arr.each{| z | body << z }
-
+  
   # send_push stream, 200, 'This is the push message.'
 
   headers.merge!( ':status'        => status.to_s        )
-  headers.merge!( 'content-length' => body.bytesize.to_s )
   headers.merge!( 'content-type'   => 'text/plain'       )
 
   delete_problem_headers! headers
-  
+
   stream.headers headers, end_stream: false
-  stream.data    body
+  body_arr.each do | part |
+    end_stream = ( part == body_arr.last )
+    stream.data    part,    end_stream: end_stream
+  end
 end
 
 def delete_problem_headers! headers
