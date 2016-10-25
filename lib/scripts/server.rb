@@ -37,7 +37,8 @@ def start_server options
       puts "Sent frame: #{frame.inspect}"
     end
     conn.on(:frame_received) do |frame|
-      puts "Received frame: #{frame.inspect}"
+      # puts "Received frame: #{frame.inspect}"
+      ap frame[ :error ] if frame[ :error ]
     end
 
     conn.on(:stream) do |stream|

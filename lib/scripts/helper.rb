@@ -1,23 +1,23 @@
 DRAFT = 'h2'.freeze
 
 def respond req, buffer, stream, sock
-  ap __method__
-
   env = build_env_for( req, buffer, stream, sock )
   status, headers, body_arr =  app.call( env )
   
   # send_push stream, 200, 'This is the push message.'
 
-  headers.merge!( ':status'        => status.to_s        )
-  headers.merge!( 'content-type'   => 'text/plain'       )
-
   delete_problem_headers! headers
 
-  stream.headers headers, end_stream: false
+  headers.merge!( ':status'      => status.to_s  )
+  headers.merge!( 'content-type' => 'text/plain' )
+
+  body = ''
   body_arr.each do | part |
-    end_stream = ( part == body_arr.last )
-    stream.data    part,    end_stream: end_stream
+    body << part
   end
+  
+  stream.headers headers, end_stream: false
+  stream.data    body,    end_stream: true
 end
 
 def delete_problem_headers! headers
@@ -28,6 +28,9 @@ def delete_problem_headers! headers
   headers.delete "Cache-Control"
   headers.delete "X-Request-Id"
   headers.delete "X-Runtime"
+  headers.delete "Content-Length"
+  headers.delete "Content-Type"
+  headers.delete "Last-Modified"
 end
 
 def app
@@ -41,8 +44,8 @@ def app
 end
 
 def send_push stream, status, body
-  headers = { 'status' => status.to_s,
-              'content-length' => body.bytesize.to_s }
+  headers = { ':status'      => status.to_s  ,
+              'content-type' => 'text/plain' }
 
   push_stream =  nil
   stream.promise( headers ) do | push |
