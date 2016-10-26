@@ -1,15 +1,18 @@
 DRAFT = 'h2'.freeze
 
 def respond req, buffer, stream, sock
+  ap ENV[ "RAILS_ENV" ]
+  if req[ ':path' ] == '/'
+    send_push stream, 200, File.read( 'app/assets/stylesheets/main.css' )
+  end
+  
   env = build_env_for( req, buffer, stream, sock )
   status, headers, body_arr =  app.call( env )
   
-  # send_push stream, 200, 'This is the push message.'
-
   delete_problem_headers! headers
 
   headers.merge!( ':status'      => status.to_s  )
-  headers.merge!( 'content-type' => 'text/plain' )
+  headers.merge!( 'content-type' => 'text/html' )
 
   body = ''
   body_arr.each do | part |
@@ -18,6 +21,24 @@ def respond req, buffer, stream, sock
   
   stream.headers headers, end_stream: false
   stream.data    body,    end_stream: true
+end
+
+def send_push stream, status, body
+  promise_headers = { ':method'    =>  'GET',
+                      ':path'      => '/assets/main.css',
+                      ':authority' => 'localhost:8080',
+                      ':scheme'    => 'https',
+                      'cache-control' => 'public, max-age=31536000' }
+
+  push_stream =  nil
+  stream.promise( promise_headers ) do | push |
+    headers = { ':status' => '200', 'content-type' => 'text/css' }
+    
+    push.headers headers
+    push_stream = push
+  end
+
+  push_stream.data body
 end
 
 def delete_problem_headers! headers
@@ -41,19 +62,6 @@ def app
 
   Rails.logger ||= Logger.new(STDOUT)
   Rails.application
-end
-
-def send_push stream, status, body
-  headers = { ':status'      => status.to_s  ,
-              'content-type' => 'text/plain' }
-
-  push_stream =  nil
-  stream.promise( headers ) do | push |
-    push.headers headers
-    push_stream = push
-  end
-
-  push_stream.data body
 end
 
 def build_env_for req, body, stream, sock

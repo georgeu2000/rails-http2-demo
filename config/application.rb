@@ -13,3 +13,8 @@ module Http2Rails
     # -- all .rb files in that directory are automatically loaded.
   end
 end
+
+Rails.application.configure do
+  config.assets.enabled = false
+  config.assets.paths << "#{Rails.root}/app/assets/stylesheets" 
+end
