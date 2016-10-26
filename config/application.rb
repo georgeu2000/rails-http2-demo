@@ -17,4 +17,7 @@ end
 Rails.application.configure do
   config.assets.enabled = false
   config.assets.paths << "#{Rails.root}/app/assets/stylesheets" 
+  config.assets.paths << "#{Rails.root}/public" 
+  
+  config.public_file_server.enabled = true
 end

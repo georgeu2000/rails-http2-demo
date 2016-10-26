@@ -1,16 +1,12 @@
 DRAFT = 'h2'.freeze
 
 def respond req, buffer, stream, sock
-  if req[ ':path' ] == '/'
-    send_push stream, 200, File.read( 'app/assets/stylesheets/main.css' )
-  end
-  
   env = build_env_for( req, buffer, stream, sock )
   status, headers, body_arr =  app.call( env )
   
   delete_problem_headers! headers
 
-  headers.merge!( ':status'      => status.to_s  )
+  headers.merge!( ':status'      => status.to_s )
   headers.merge!( 'content-type' => 'text/html' )
 
   body = ''
@@ -22,15 +18,9 @@ def respond req, buffer, stream, sock
   stream.data    body,    end_stream: true
 end
 
-def send_push stream, status, body
-  promise_headers = { ':method'    =>  'GET',
-                      ':path'      => '/assets/main.css',
-                      ':authority' => 'localhost:8080',
-                      ':scheme'    => 'https',
-                      'cache-control' => 'public, max-age=31536000' }
-
+def send_push stream, status, headers, body
   push_stream =  nil
-  stream.promise( promise_headers ) do | push |
+  stream.promise( headers ) do | push |
     headers = { ':status' => '200', 'content-type' => 'text/css' }
     
     push.headers headers
@@ -68,6 +58,7 @@ def build_env_for req, body, stream, sock
 
   rack_req = Rack::MockRequest.env_for( uri )
   rack_req[ 'ACCEPT' ] = req[ 'accept' ]
+  rack_req[ 'STREAM' ] = stream
   rack_req[ 'SOCKET' ] = sock
 
   rack_req
