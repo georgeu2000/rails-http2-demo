@@ -1,7 +1,6 @@
 DRAFT = 'h2'.freeze
 
 def respond req, buffer, stream, sock
-  ap ENV[ "RAILS_ENV" ]
   if req[ ':path' ] == '/'
     send_push stream, 200, File.read( 'app/assets/stylesheets/main.css' )
   end

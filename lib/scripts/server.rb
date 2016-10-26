@@ -30,15 +30,17 @@ def start_server options
 
     conn = HTTP2::Server.new
     conn.on(:frame) do |bytes|
-      puts "Writing bytes: #{bytes.unpack("H*").first}"
+      # puts "Writing bytes: #{bytes.unpack("H*").first}"
       sock.write bytes
     end
     conn.on(:frame_sent) do |frame|
-      puts "Sent frame: #{frame.inspect}"
+      # puts "Sent frame: #{frame.inspect}"
     end
     conn.on(:frame_received) do |frame|
-      # puts "Received frame: #{frame.inspect}"
-      ap frame[ :error ] if frame[ :error ]
+      if frame[ :error ].present? && frame[ :error ] != :no_error
+        puts "Received error frame:".yellow
+        ap frame
+      end
     end
 
     conn.on(:stream) do |stream|
@@ -50,7 +52,7 @@ def start_server options
 
       stream.on(:headers) do |h|
         req = Hash[*h.flatten]
-        log.info "request headers: #{h}"
+        # log.info "request headers: #{h}"
       end
 
       stream.on(:data) do |d|
