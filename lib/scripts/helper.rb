@@ -4,22 +4,15 @@ def respond req, buffer, stream, sock
   env = build_env_for( req, buffer, stream, sock )
   status, headers, body_arr =  app.call( env )
 
-  delete_problem_headers! headers
-
-  headers.merge!( ':status'      => status.to_s )
-  headers.merge!( 'content-type' => 'text/html' )
-
+  new_headers = headers_for( headers, status )
+  
   body = ''
   body_arr.each do | part |
     body << part
   end
 
-  # ap status
-  # ap headers
-  # ap body
-  
-  stream.headers headers, end_stream: false
-  stream.data    body,    end_stream: true
+  stream.headers new_headers, end_stream: false
+  stream.data    body,        end_stream: true
 end
 
 def send_push stream, status, headers, body
@@ -34,18 +27,13 @@ def send_push stream, status, headers, body
   push_stream.data body
 end
 
-def delete_problem_headers! headers
-  headers.delete 'ETag'
-  headers.delete "X-Frame-Options"
-  headers.delete "X-XSS-Protection"
-  headers.delete "X-Content-Type-Options"
-  headers.delete "Cache-Control"
-  headers.delete "X-Request-Id"
-  headers.delete "X-Runtime"
-  headers.delete "Content-Length"
-  headers.delete "Content-Type"
-  headers.delete "Last-Modified"
-  headers.delete "Vary"
+def headers_for headers, status
+  new_headers = { ':status' => status.to_s }
+  headers.each do | k,v |
+    new_headers[ k.downcase ] = v
+  end
+
+  new_headers
 end
 
 def app

@@ -18,4 +18,10 @@ feature 'Page' do
 
     expect( page ).to have_content 'body'
   end
+
+  specify 'Favicon' do
+    visit 'https://localhost:8080/favicon.ico'
+
+    expect( page ).to have_content ''
+  end
 end
