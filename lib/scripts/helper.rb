@@ -1,7 +1,7 @@
 DRAFT = 'h2'.freeze
 
 def respond req, buffer, stream
-  env = build_env_for( req, buffer, stream )
+  env = build_env_for( req, stream )
   status, headers, body_arr =  app.call( env )
 
   new_headers = headers_for( headers, status )
@@ -53,7 +53,7 @@ def app
   Rails.application
 end
 
-def build_env_for req, body, stream
+def build_env_for req, stream
   uri = "#{ req[ ':scheme' ]}://#{ req[ ':authority' ]}#{ req[ ':path' ]}"
 
   rack_req = Rack::MockRequest.env_for( uri )
@@ -120,16 +120,20 @@ def handle_connection_for sock
   end
 
   while !sock.closed? && !(sock.eof? rescue true)
-    data = sock.readpartial(1024)
-    # puts "Received bytes: #{data.unpack("H*").first}"
+    read_socket sock, conn
+  end
+end
 
-    begin
-      conn << data
-    rescue => e
-      puts "#{e.class} exception: #{e.message} - closing socket."
-      e.backtrace.each { |l| puts "\t" + l }
-      sock.close
-    end
+def read_socket sock, conn
+   data = sock.readpartial(1024)
+  # puts "Received bytes: #{data.unpack("H*").first}"
+
+  begin
+    conn << data
+  rescue => e
+    puts "#{e.class} exception: #{e.message} - closing socket."
+    e.backtrace.each { |l| puts "\t" + l }
+    sock.close
   end
 end
 
