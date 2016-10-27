@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/georgeu2000/rails-http2-demo/badges/gpa.svg)](https://codeclimate.com/github/georgeu2000/rails-http2-demo)
+
 ###Demo app for Rails using HTTP/2
 
 ###Supports all major features of HTTP/2 including:
