@@ -16,11 +16,18 @@ def respond req, buffer, stream
 end
 
 def send_push stream, status, headers, body
+  resource_headers = { ':status' => status.to_s,
+                       'content-type' => headers.delete( 'Content-Type' )}
+
+  headers.merge!( ':method'       =>  headers.delete( :method ).to_s.upcase,
+                  ':path'         =>  headers.delete( :path ),
+                  ':authority'    => 'localhost:8080',
+                  ':scheme'       => 'https',
+                  'cache-control' => 'public, max-age=31536000' )
+
   push_stream =  nil
   stream.promise( headers ) do | push |
-    headers = { ':status' => '200', 'content-type' => 'text/css' }
-    
-    push.headers headers
+    push.headers resource_headers
     push_stream = push
   end
 
