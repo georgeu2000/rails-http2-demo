@@ -1,5 +1,9 @@
 class PagesController < ApplicationController
   def index
+    # sleep 2
+  end
+
+  def push
     headers = { ':method'    =>  'GET',
                 ':path'      => '/assets/main.css',
                 ':authority' => 'localhost:8080',
