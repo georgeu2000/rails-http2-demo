@@ -1,11 +1,14 @@
 DRAFT = 'h2'.freeze
 
-def respond req, buffer, stream
-  env = build_env_for( req, stream )
+def response_for req, buffer, stream
+  env = build_env_for( req, buffer, stream )
+  # ap env
+  # ap req
+
   status, headers, body_arr =  app.call( env )
 
   new_headers = headers_for( headers, status )
-  
+
   body = ''
   body_arr.each do | part |
     body << part
@@ -53,12 +56,14 @@ def app
   Rails.application
 end
 
-def build_env_for req, stream
+def build_env_for req, body, stream
   uri = "#{ req[ ':scheme' ]}://#{ req[ ':authority' ]}#{ req[ ':path' ]}"
 
-  rack_req = Rack::MockRequest.env_for( uri )
-  rack_req[ 'ACCEPT' ] = req[ 'accept' ]
+  rack_req = Rack::MockRequest.env_for( uri, { 'HTTP_ACCEPT' => req[ 'accept' ]})
   rack_req[ 'STREAM' ] = stream
+  # rack_req[ 'RACK_INPUT' ] = body
+  # rack_req.add_header 'x-foo', 'bar'
+  # ap rack_req.keys
 
   rack_req
 end
@@ -157,7 +162,7 @@ def handle_stream_for stream
   stream.on(:half_close) do
     log.info 'client closed its end of the stream'
     
-    respond req, buffer, stream
+    response_for req, buffer, stream
   end
 end
 

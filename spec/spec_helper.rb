@@ -39,7 +39,7 @@ RSpec.configure do |config|
     /gems/
   ]
 
-  config.before(:all) do
+  config.before(:suite) do
     @thread = Thread.new{ start_server( secure:true, port:8080 )}
     sleep 0.1
   end
@@ -47,8 +47,8 @@ RSpec.configure do |config|
   config.before(:each) do
   end
 
-  config.after(:all) do
+  config.after(:suite) do
     puts "\nStopping server."
-    @thread.kill
+    @thread.kill if @thread
   end
 end
