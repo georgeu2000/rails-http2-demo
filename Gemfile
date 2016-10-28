@@ -22,4 +22,5 @@ group :test do
   gem 'selenium-webdriver', '~> 2.53'
   gem 'launchy', '~> 2.4'
   gem 'pry'
+  gem 'net-http2'
 end
