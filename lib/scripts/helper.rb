@@ -2,9 +2,6 @@ DRAFT = 'h2'.freeze
 
 def response_for req, buffer, stream
   env = build_env_for( req, buffer, stream )
-  # ap env
-  # ap req
-
   status, headers, body_arr =  app.call( env )
 
   new_headers = headers_for( headers, status )
@@ -59,15 +56,20 @@ end
 def build_env_for req, body, stream
   uri = "#{ req[ ':scheme' ]}://#{ req[ ':authority' ]}#{ req[ ':path' ]}"
 
-  rack_req = Rack::MockRequest.env_for( uri )
+  # ap body
+
+  rack_req = Rack::MockRequest.env_for( uri,{ input:body })
   
   req.reject{| k,v | k.starts_with? ':' }
      .each do | k,v |
-       rack_key = "HTTP_#{ k.upcase.gsub( '-', '_' )}"
+       rack_key = "#{ k.upcase.gsub( '-', '_' )}"
        rack_req[ rack_key ] = req[ k ]
   end
 
   # ap req
+
+  rack_req[ 'REQUEST_METHOD' ] = req[ ':method' ]
+  
   # ap rack_req
 
   rack_req[ 'STREAM' ] = stream

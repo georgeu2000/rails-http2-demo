@@ -3,5 +3,6 @@ Rails.application.routes.draw do
 
   get '/push', to:'pages#push'
 
-  get '/mirror', to:'pages#mirror'
+  get  '/mirror', to:'pages#mirror'
+  post '/mirror', to:'pages#mirror'
 end

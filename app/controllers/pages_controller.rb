@@ -13,16 +13,17 @@ class PagesController < ApplicationController
   end
 
   def mirror
+    @method  = request.method
     @headers = all_headers.join( '<br>' )
     @params  = all_params.join( '<br>'  )
+    @body    = request.body.read
   end
 
 
   private
 
   def all_headers
-    request.headers.select{ | k, v |  k.match /^HTTP_/ }
-                   .map do | k, v |
+    request.headers.map do | k, v |
                       key = k.gsub( /^HTTP_/, '' ).split( '_'        )
                                                   .map( &:capitalize )
                                                   .join( '-'         )
