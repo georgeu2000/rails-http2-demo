@@ -21,7 +21,7 @@ class PagesController < ApplicationController
   private
 
   def all_headers
-    request.headers.select{ | k, v |  k.match /^HTTP_/           }
+    request.headers.select{ | k, v |  k.match /^HTTP_/        }
                    .map{    | k, v | "#{ k.gsub( /^HTTP_/, '' ).capitalize }: #{ v }" }
   end
 

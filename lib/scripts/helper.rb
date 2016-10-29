@@ -59,11 +59,17 @@ end
 def build_env_for req, body, stream
   uri = "#{ req[ ':scheme' ]}://#{ req[ ':authority' ]}#{ req[ ':path' ]}"
 
-  rack_req = Rack::MockRequest.env_for( uri, { 'HTTP_ACCEPT' => req[ 'accept' ]})
+  rack_req = Rack::MockRequest.env_for( uri )
+  
+  req.reject{| k,v | k.starts_with? ':' }
+     .each do | k,v |
+       rack_key = "HTTP_#{ k.upcase.gsub( '-', '_' )}"
+       rack_req[ rack_key ] = req[ k ]
+  end
+
+  # ap rack_req
+
   rack_req[ 'STREAM' ] = stream
-  # rack_req[ 'RACK_INPUT' ] = body
-  # rack_req.add_header 'x-foo', 'bar'
-  # ap rack_req.keys
 
   rack_req
 end
