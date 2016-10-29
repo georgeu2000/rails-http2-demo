@@ -67,6 +67,7 @@ def build_env_for req, body, stream
        rack_req[ rack_key ] = req[ k ]
   end
 
+  # ap req
   # ap rack_req
 
   rack_req[ 'STREAM' ] = stream
