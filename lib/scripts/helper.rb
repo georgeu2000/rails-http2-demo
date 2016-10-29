@@ -60,11 +60,11 @@ def build_env_for req, body, stream
 
   rack_req = Rack::MockRequest.env_for( uri,{ input:body })
   
-  req.reject{| k,v | k.starts_with? ':' }
+  req.reject{| k,_v | k.starts_with? ':' }
      .each do | k,v |
-       rack_key = "#{ k.upcase.gsub( '-', '_' )}"
-       rack_req[ rack_key ] = req[ k ]
-  end
+       rack_key = "#{ k.upcase.tr( '-', '_' )}"
+       rack_req[ rack_key ] = v
+     end
 
   # ap req
 
