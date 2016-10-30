@@ -1,4 +1,4 @@
-DRAFT = 'h2'.freeze
+PROTOCOL = 'h2'.freeze
 
 def response_for req, buffer, stream
   env = build_env_for( req, buffer, stream )
@@ -184,8 +184,8 @@ def secure_server server
   ctx.alpn_protocols = ['h2']
 
   ctx.alpn_select_cb = lambda do |protocols|
-    raise "Protocol #{DRAFT} is required" if protocols.index(DRAFT).nil?
-    DRAFT
+    raise "Protocol #{PROTOCOL} is required" unless protocols.include?(PROTOCOL)
+    PROTOCOL
   end
 
   ctx.tmp_ecdh_callback = lambda do |*_args|
