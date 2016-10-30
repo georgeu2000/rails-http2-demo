@@ -1,4 +1,5 @@
 PROTOCOL = 'h2'.freeze
+NO_PREFIX_HEADERS = [ 'content-type' ]
 
 def response_for req, buffer, stream
   env = build_env_for( req, buffer, stream )
@@ -60,13 +61,21 @@ def build_env_for req, body, stream
 
   rack_req = Rack::MockRequest.env_for( uri,{ input:body })
   
+  # Add non-HTTP/2 headers
   req.reject{| k,_v | k.starts_with? ':' }
      .each do | k,v |
-       rack_key = "#{ k.upcase.tr( '-', '_' )}"
+       rack_key = "HTTP_#{ k.upcase.tr( '-', '_' )}"
        rack_req[ rack_key ] = v
      end
 
-  # ap req
+  # Add headers that do not require HTTP_ prefix
+  req.select{| k,_V | NO_PREFIX_HEADERS.include? k }
+     .each do | k,v |
+        rack_key = k.upcase.split( '-' ).join( '_' )
+        rack_req[ rack_key ] = v
+     end
+
+  # ap rack_req
 
   rack_req[ 'REQUEST_METHOD' ] = req[ ':method' ]
   

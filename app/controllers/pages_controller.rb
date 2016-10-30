@@ -23,10 +23,11 @@ class PagesController < ApplicationController
   private
 
   def all_headers
-    request.headers.map do | k, v |
+    request.headers.select{| k,_v | k.start_with?( 'HTTP_' )}
+                   .map do | k, v |
                       key = k.gsub( /^HTTP_/, '' ).split( '_'        )
-                                                  .map( &:capitalize )
-                                                  .join( '-'         )
+                                                   .map( &:capitalize )
+                                                   .join( '-'         )
                       "#{ key }: #{ v }"
                     end
   end

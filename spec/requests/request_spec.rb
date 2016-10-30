@@ -46,4 +46,30 @@ describe 'Requests' do
     expect( response.body ).to include 'Method: POST'
     expect( response.body ).to include 'post body content'
   end
+
+  describe 'Header state is maintained' ,:skip do
+    specify do
+      response = client.call(:get, '/mirror', headers:{ 'x-custom-header' => 'custom-value' })
+      client.close
+
+      expect( response.ok?    ).to eq true
+      expect( response.status ).to eq '200'
+
+      expect( response.body ).to include 'X-Custom-Header'
+      expect( response.body ).to include 'custom-value'
+
+      response = client.call(:get, '/mirror', headers:{ 'x-custom-header2' => 'custom-value2' })      
+      client.close
+
+      expect( response.ok?    ).to eq true
+      expect( response.status ).to eq '200'
+
+      puts response.body
+
+      expect( response.body ).to include 'X-Custom-Header'
+      expect( response.body ).to include 'custom-value'
+      expect( response.body ).to include 'X-Custom-Header-2'
+      expect( response.body ).to include 'custom-value-2'
+    end
+  end
 end
